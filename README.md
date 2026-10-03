@@ -165,7 +165,6 @@ any `pkg*` files, then deletes itself.
 ## Notes
 
 - CI (`.github/workflows/ci.yml`) runs the full build → test → install →
-  consumer-check flow on GCC and Clang. It has not been run from this repo
-  yet.
+  consumer-check flow on GCC and Clang.
 - The `.tar.gz` from CPack contains the installed tree (headers, library,
   CMake config files).
