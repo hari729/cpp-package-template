@@ -44,6 +44,12 @@ find "$root" -name '*pkg*' \
   fi
 done
 
+# Reset README to a stub
+printf '# %s\n' "${name}" > README.md
+
+# Remove template license so the new project picks its own
+rm -f LICENSE
+
 # Self-destruct
 rm -- "$0"
 
