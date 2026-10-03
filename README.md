@@ -27,6 +27,49 @@ for `find_package` consumers, tests, presets, CI, and packaging.
 └── init.sh                     # renames pkg/PKG placeholders to a new project name
 ```
 
+## Commands
+
+The quickest way to get started is with the `dev` preset defined in
+`CMakePresets.json`. It selects Ninja, puts build files under `build/dev`,
+and installs to `install/dev`.
+
+```bash
+# Generate the build system using the 'dev' preset.
+# This creates build/dev and configures the project with default options.
+cmake --preset dev
+
+# Compile the library, tests, and examples.
+cmake --build build/dev
+
+# Run the unit tests registered with CTest.
+ctest --preset dev
+
+# Run the example executable that links against pkg::pkg.
+./build/dev/examples/pkg_example
+
+# Install headers, library, and CMake config files into install/dev.
+# The install prefix is set by the preset, so no sudo is needed.
+cmake --build build/dev --target install
+
+# Verify that a standalone project can find and use the installed package.
+# Point the consumer to the install tree with CMAKE_PREFIX_PATH.
+cmake -S tests/consumer -B build/consumer \
+  -DCMAKE_PREFIX_PATH="$PWD/install/dev"
+cmake --build build/consumer
+./build/consumer/consumer
+
+# Create a distributable .tar.gz of the installed tree.
+# The CPack config is generated during the configure step above.
+cpack -B build/cpack --config build/dev/CPackConfig.cmake
+```
+
+A downstream `CMakeLists.txt` then only needs:
+
+```cmake
+find_package(pkg REQUIRED)
+target_link_libraries(app PRIVATE pkg::pkg)
+```
+
 ## How it works
 
 ### Targets
@@ -109,37 +152,6 @@ time and substituted into the config template.
 
 When the project is top-level, `include(CPack)` generates a `.tar.gz` of the
 installed tree with `cpack --config build/dev/CPackConfig.cmake`.
-
-## Commands
-
-```bash
-# configure, build, test
-cmake --preset dev
-cmake --build build/dev
-ctest --preset dev
-
-# run the example
-./build/dev/examples/pkg_example
-
-# install to ./install/dev (prefix set by the preset)
-cmake --build build/dev --target install
-
-# verify a downstream project can find it
-cmake -S tests/consumer -B build/consumer \
-  -DCMAKE_PREFIX_PATH="$PWD/install/dev"
-cmake --build build/consumer
-./build/consumer/consumer
-
-# create a .tar.gz package
-cpack -B build/cpack --config build/dev/CPackConfig.cmake
-```
-
-A downstream `CMakeLists.txt` then only needs:
-
-```cmake
-find_package(pkg REQUIRED)
-target_link_libraries(app PRIVATE pkg::pkg)
-```
 
 ## Reusing as a template
 
